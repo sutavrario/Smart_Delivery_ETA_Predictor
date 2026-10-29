@@ -1,0 +1,28 @@
+# Virtual Environments & dependencies
+Lib/
+etc/
+bin/
+include/
+pyvenv.cfg
+.env
+.venv
+env/
+venv/
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints
+
+# Operating System files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db

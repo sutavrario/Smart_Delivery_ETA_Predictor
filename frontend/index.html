@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Food Express AI • Delivery Time Predictor</title>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="weather-clear">
+  <!-- Dynamic Fullscreen Weather Canvas -->
+  <canvas id="weatherCanvas"></canvas>
+  <div id="lightningOverlay" class="lightning-overlay"></div>
+
+  <!-- Main App Shell -->
+  <div class="app-container">
+
+    <!-- Header Navigation -->
+    <header class="navbar">
+      <div class="nav-brand">
+        <div class="brand-logo">
+          <span class="logo-icon">🛵</span>
+          <div class="logo-pulse"></div>
+        </div>
+        <div class="brand-text">
+          <span class="brand-title">FOOD EXPRESS <span class="badge-ai">AI ENGINE</span></span>
+          <span class="brand-subtitle">Smart Delivery ETA Prediction • <code class="model-tag">Rio.pkl</code></span>
+        </div>
+      </div>
+
+      <div class="nav-actions">
+        <div class="live-clock-badge">
+          <span class="pulse-dot"></span>
+          <span id="liveTime">--:--:--</span>
+        </div>
+        <button id="soundToggleBtn" class="btn-icon" title="Toggle Sound Effects">
+          <span id="soundIcon">🔊</span>
+          <span class="sound-label">Audio FX</span>
+        </button>
+        <button id="modelDetailsBtn" class="btn-secondary" title="View Model Weights">
+          <span>📐 Model Info</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Content Grid -->
+    <main class="content-grid">
+
+      <!-- LEFT: Dynamic Animation Centerpiece (Delivery Boy Journey + Kitchen Live Cam) -->
+      <section class="stage-section glass-panel">
+        
+        <!-- Stage Top Bar: Real-time telemetry -->
+        <div class="stage-header">
+          <div class="telemetry-item">
+            <span class="tel-label">SIMULATED SPEED</span>
+            <span class="tel-val" id="speedReadout">42 <small>km/h</small></span>
+          </div>
+          <div class="telemetry-item">
+            <span class="tel-label">ROAD STATUS</span>
+            <span class="tel-val status-badge" id="roadStatusBadge">Cruising Smooth</span>
+          </div>
+          <div class="telemetry-item">
+            <span class="tel-label">WEATHER RADAR</span>
+            <span class="tel-val weather-badge" id="weatherStatusBadge">Clear Skies ☀️</span>
+          </div>
+          <div class="telemetry-item">
+            <span class="tel-label">KITCHEN STATUS</span>
+            <span class="tel-val kitchen-badge" id="kitchenStatusBadge">Wok Sizzling 🔥</span>
+          </div>
+        </div>
+
+        <!-- The Interactive Panorama (City Road + Traffic + Rider) -->
+        <div class="panorama-wrapper" id="panorama">
+          
+          <!-- Sky & Parallax Skyline -->
+          <div class="sky-layer" id="skyLayer">
+            <div class="sun-glow" id="sunGlow"></div>
+            <div class="moon-glow" id="moonGlow"></div>
+            <div class="cloud cloud-1"></div>
+            <div class="cloud cloud-2"></div>
+            <div class="cloud cloud-3"></div>
+          </div>
+          
+          <div class="city-skyline" id="citySkyline"></div>
+
+          <!-- Road Canvas for dynamic lane animations, traffic & wet asphalt -->
+          <canvas id="roadCanvas"></canvas>
+
+          <!-- The Delivery Scooter Rider (Rio) -->
+          <div class="rider-container" id="riderContainer">
+            <div class="rider-shadow"></div>
+            <!-- Dynamic Headlight Cone -->
+            <div class="headlight-beam" id="headlightBeam"></div>
+            
+            <!-- SVG Delivery Bike & Rider -->
+            <svg class="rider-svg" viewBox="0 0 200 140" id="riderSvg">
+              <defs>
+                <linearGradient id="scooterBodyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#FF5722"/>
+                  <stop offset="50%" stop-color="#F4511E"/>
+                  <stop offset="100%" stop-color="#BF360C"/>
+                </linearGradient>
+                <linearGradient id="chromeGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stop-color="#ECEFF1"/>
+                  <stop offset="50%" stop-color="#B0BEC5"/>
+                  <stop offset="100%" stop-color="#78909C"/>
+                </linearGradient>
+                <linearGradient id="neonBagGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#00E676"/>
+                  <stop offset="100%" stop-color="#00B0FF"/>
+                </linearGradient>
+                <radialGradient id="wheelGrad" cx="50%" cy="50%" r="50%">
+                  <stop offset="60%" stop-color="#212121"/>
+                  <stop offset="90%" stop-color="#424242"/>
+                  <stop offset="100%" stop-color="#616161"/>
+                </radialGradient>
+              </defs>
+
+              <!-- Exhaust Puffs Group -->
+              <g id="exhaustGroup"></g>
+
+              <!-- Back Wheel -->
+              <g class="wheel back-wheel" id="backWheel">
+                <circle cx="45" cy="115" r="22" fill="url(#wheelGrad)" stroke="#1a1a1a" stroke-width="4"/>
+                <circle cx="45" cy="115" r="14" fill="#CFD8DC" stroke="#78909C" stroke-width="2"/>
+                <circle cx="45" cy="115" r="5" fill="#37474F"/>
+                <!-- Spokes -->
+                <line x1="45" y1="101" x2="45" y2="129" stroke="#546E7A" stroke-width="2"/>
+                <line x1="31" y1="115" x2="59" y2="115" stroke="#546E7A" stroke-width="2"/>
+                <line x1="35" y1="105" x2="55" y2="125" stroke="#546E7A" stroke-width="2"/>
+                <line x1="35" y1="125" x2="55" y2="105" stroke="#546E7A" stroke-width="2"/>
+              </g>
+
+              <!-- Front Wheel -->
+              <g class="wheel front-wheel" id="frontWheel">
+                <circle cx="155" cy="115" r="22" fill="url(#wheelGrad)" stroke="#1a1a1a" stroke-width="4"/>
+                <circle cx="155" cy="115" r="14" fill="#CFD8DC" stroke="#78909C" stroke-width="2"/>
+                <circle cx="155" cy="115" r="5" fill="#37474F"/>
+                <!-- Spokes -->
+                <line x1="155" y1="101" x2="155" y2="129" stroke="#546E7A" stroke-width="2"/>
+                <line x1="141" y1="115" x2="169" y2="115" stroke="#546E7A" stroke-width="2"/>
+                <line x1="145" y1="105" x2="165" y2="125" stroke="#546E7A" stroke-width="2"/>
+                <line x1="145" y1="125" x2="165" y2="105" stroke="#546E7A" stroke-width="2"/>
+              </g>
+
+              <!-- Scooter Chassis & Body -->
+              <g class="bike-chassis" id="bikeChassis">
+                <!-- Mudguards -->
+                <path d="M 23 115 A 24 24 0 0 1 65 95" fill="none" stroke="#263238" stroke-width="5" stroke-linecap="round"/>
+                <path d="M 135 98 A 24 24 0 0 1 175 115" fill="none" stroke="#263238" stroke-width="5" stroke-linecap="round"/>
+                
+                <!-- Main frame / Floorboard -->
+                <path d="M 45 115 L 75 110 L 95 110 L 135 85 L 145 65" fill="none" stroke="url(#chromeGrad)" stroke-width="6" stroke-linejoin="round"/>
+                <path d="M 75 112 L 120 112" stroke="#212121" stroke-width="7" stroke-linecap="round"/>
+
+                <!-- Body Shell -->
+                <path d="M 50 100 Q 70 80 90 95 L 85 110 Z" fill="url(#scooterBodyGrad)"/>
+                <path d="M 115 110 L 140 75 L 155 80 L 135 110 Z" fill="url(#scooterBodyGrad)"/>
+                
+                <!-- Front Fairing & Handlebar -->
+                <path d="M 138 78 L 150 48" stroke="url(#chromeGrad)" stroke-width="5" stroke-linecap="round"/>
+                <line x1="142" y1="46" x2="158" y2="50" stroke="#212121" stroke-width="6" stroke-linecap="round"/>
+                
+                <!-- Headlight unit -->
+                <polygon points="152,52 165,58 155,68 146,62" fill="#FFEB3B" stroke="#F57F17" stroke-width="1.5"/>
+                <circle cx="160" cy="60" r="3" fill="#FFF9C4" class="headlight-bulb"/>
+
+                <!-- Seat -->
+                <path d="M 60 90 C 70 82, 100 84, 110 92 L 105 97 L 65 95 Z" fill="#212121" stroke="#37474F" stroke-width="1.5"/>
+                
+                <!-- Food Express Delivery Bag / Box -->
+                <g class="delivery-box" id="deliveryBox">
+                  <rect x="25" y="55" width="40" height="42" rx="6" fill="url(#neonBagGrad)" stroke="#004D40" stroke-width="2"/>
+                  <rect x="29" y="59" width="32" height="6" rx="2" fill="#FFFFFF" opacity="0.6"/>
+                  <text x="45" y="80" font-family="'Space Grotesk', sans-serif" font-size="7.5" font-weight="700" fill="#00332c" text-anchor="middle">FOOD</text>
+                  <text x="45" y="90" font-family="'Space Grotesk', sans-serif" font-size="6" font-weight="600" fill="#00332c" text-anchor="middle">EXPRESS</text>
+                  <circle cx="60" cy="60" r="2.5" fill="#76FF03" class="status-led"/>
+                </g>
+              </g>
+
+              <!-- Rider Figure (Delivery Boy) -->
+              <g class="rider-body" id="riderBody">
+                <!-- Leg / Boot -->
+                <path d="M 88 88 L 100 102 L 115 102" fill="none" stroke="#263238" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M 112 102 L 122 102" stroke="#102027" stroke-width="9" stroke-linecap="round"/>
+
+                <!-- Torso & Jacket -->
+                <path d="M 85 85 L 98 52 C 105 52, 120 62, 116 75 Z" fill="#29B6F6" id="riderJacket" stroke="#0277BD" stroke-width="1.5"/>
+                
+                <!-- Raincoat Overlay (activated on rain) -->
+                <path d="M 82 85 L 97 50 C 107 50, 122 62, 118 78 Z" fill="#FFEA00" id="riderRaincoat" opacity="0" stroke="#F57F17" stroke-width="1.5"/>
+
+                <!-- Arms & Hands holding handlebar -->
+                <path d="M 104 58 L 130 60 L 146 50" fill="none" stroke="#0277BD" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="147" cy="49" r="4" fill="#212121"/> <!-- Glove -->
+
+                <!-- Fluttering Scarf / Backpack Strap -->
+                <path d="M 94 48 Q 80 50 68 45" fill="none" stroke="#FF1744" stroke-width="4" stroke-linecap="round" id="riderScarf"/>
+
+                <!-- Helmet & Visor -->
+                <circle cx="108" cy="38" r="14" fill="#263238" id="riderHelmet" stroke="#37474F" stroke-width="2"/>
+                <path d="M 112 32 Q 124 37 118 45 L 110 44 Z" fill="#00E5FF" opacity="0.85" id="riderVisor"/>
+              </g>
+            </svg>
+          </div>
+
+          <!-- Traffic Cars Container -->
+          <div class="traffic-container" id="trafficContainer">
+            <!-- Dynamic vehicles injected by JS -->
+          </div>
+
+          <!-- Honk alerts container -->
+          <div class="honk-alerts" id="honkAlerts"></div>
+        </div>
+
+        <!-- BOTTOM STAGE: Interactive Restaurant & Kitchen Live-Cam -->
+        <div class="kitchen-dock">
+          <div class="kitchen-card">
+            <div class="kitchen-header">
+              <div class="kitchen-title-box">
+                <span class="kitchen-icon">🍳</span>
+                <div>
+                  <h4 class="kitchen-title">FOOD CENTRAL KITCHEN & GRILL</h4>
+                  <p class="kitchen-sub">Live Kitchen Station & Order Prep Simulator</p>
+                </div>
+              </div>
+              <div class="kitchen-order-ticket">
+                <span class="ticket-label">TICKET #429</span>
+                <span class="ticket-time" id="ticketPrepTime">15 min prep</span>
+              </div>
+            </div>
+
+            <!-- Animated Kitchen Visual Stage -->
+            <div class="kitchen-visual-stage" id="kitchenStage">
+              <!-- Chef Avatar -->
+              <div class="chef-avatar">
+                <div class="chef-hat">👨‍🍳</div>
+                <div class="chef-motion" id="chefMotion"></div>
+              </div>
+
+              <!-- Sizzling Wok / Frying Pan with Tossed Food -->
+              <div class="cook-station">
+                <div class="gas-burner" id="gasBurner">
+                  <div class="flame flame-1"></div>
+                  <div class="flame flame-2"></div>
+                  <div class="flame flame-3"></div>
+                </div>
+                <div class="frying-pan" id="fryingPan">
+                  <div class="pan-handle"></div>
+                  <div class="pan-body">
+                    <div class="food-patty patty-1">🥩</div>
+                    <div class="food-patty patty-2">🧅</div>
+                    <div class="food-patty patty-3">🌶️</div>
+                  </div>
+                </div>
+                <!-- Steam Emitters -->
+                <div class="steam-container" id="steamContainer">
+                  <div class="steam steam-1"></div>
+                  <div class="steam steam-2"></div>
+                  <div class="steam steam-3"></div>
+                  <div class="steam steam-4"></div>
+                </div>
+              </div>
+
+              <!-- Glowing Pizza / Baking Oven -->
+              <div class="oven-station" id="ovenStation">
+                <div class="oven-window">
+                  <div class="oven-glow" id="ovenGlow"></div>
+                  <span class="oven-item">🍕</span>
+                </div>
+                <span class="oven-label">380°C STONE OVEN</span>
+              </div>
+
+              <!-- Live Cooking Intensity Meter -->
+              <div class="prep-activity-meter">
+                <div class="meter-bar-container">
+                  <div class="meter-fill" id="prepMeterFill" style="width: 50%;"></div>
+                </div>
+                <div class="meter-stats">
+                  <span class="meter-text">Kitchen Velocity: <strong id="prepVelocityText">Balanced Pace</strong></span>
+                  <span class="meter-heat" id="prepHeatText">Heat: 50%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- RIGHT: Interactive Controls + Live Prediction Hub -->
+      <section class="controls-section">
+        
+        <!-- TOP: Live Prediction Card (The Hero Metric) -->
+        <div class="prediction-card glass-panel" id="predictionCard">
+          <div class="pred-header">
+            <span class="pred-tag">MACHINE LEARNING PREDICTION</span>
+            <span class="accuracy-badge">R² 0.984 • Rio.pkl</span>
+          </div>
+
+          <div class="pred-main-display">
+            <div class="time-readout-wrap">
+              <span class="time-readout" id="etaMinutes">28.4</span>
+              <span class="time-unit">MINUTES</span>
+            </div>
+            <div class="eta-clock-box">
+              <span class="clock-label">ESTIMATED ARRIVAL</span>
+              <span class="clock-value" id="etaClock">--:-- PM</span>
+              <div class="eta-progress-track">
+                <div class="eta-progress-bar" id="etaProgressBar" style="width: 65%;"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Factor Impact Waterfall -->
+          <div class="factor-breakdown">
+            <div class="breakdown-title">
+              <span>Factor Contribution Breakdown</span>
+              <small>Calculated from Model Coefficients</small>
+            </div>
+            
+            <div class="breakdown-bars">
+              <div class="breakdown-row" title="Distance Impact: +3.01 min per km">
+                <span class="row-label">Distance (<span id="bdDistanceVal">5.0</span> km)</span>
+                <div class="row-bar-track">
+                  <div class="row-bar-fill bar-distance" id="barDistance" style="width: 45%;"></div>
+                </div>
+                <span class="row-val" id="bdDistanceImpact">+15.0m</span>
+              </div>
+
+              <div class="breakdown-row" title="Preparation Impact: +1.00 min per prep min">
+                <span class="row-label">Kitchen Prep (<span id="bdPrepVal">15</span>m)</span>
+                <div class="row-bar-track">
+                  <div class="row-bar-fill bar-prep" id="barPrep" style="width: 50%;"></div>
+                </div>
+                <span class="row-val" id="bdPrepImpact">+15.0m</span>
+              </div>
+
+              <div class="breakdown-row" title="Traffic Penalty: +3.98 min per traffic level">
+                <span class="row-label">Traffic (<span id="bdTrafficVal">Level 2</span>)</span>
+                <div class="row-bar-track">
+                  <div class="row-bar-fill bar-traffic" id="barTraffic" style="width: 40%;"></div>
+                </div>
+                <span class="row-val" id="bdTrafficImpact">+8.0m</span>
+              </div>
+
+              <div class="breakdown-row" title="Weather Friction: +1.98 min per severity level">
+                <span class="row-label">Weather (<span id="bdWeatherVal">Rainy</span>)</span>
+                <div class="row-bar-track">
+                  <div class="row-bar-fill bar-weather" id="barWeather" style="width: 30%;"></div>
+                </div>
+                <span class="row-val" id="bdWeatherImpact">+4.0m</span>
+              </div>
+
+              <div class="breakdown-row" title="Rider Experience Discount: -0.36 min per year">
+                <span class="row-label">Rider Bonus (<span id="bdRiderVal">3 yrs</span>)</span>
+                <div class="row-bar-track">
+                  <div class="row-bar-fill bar-bonus" id="barBonus" style="width: 20%;"></div>
+                </div>
+                <span class="row-val bonus-text" id="bdRiderImpact">-1.1m</span>
+              </div>
+
+              <div class="breakdown-row offset-row" title="Base Order Intercept: +4.94 min">
+                <span class="row-label">Base Transit Offset</span>
+                <div class="row-bar-track">
+                  <div class="row-bar-fill bar-base" style="width: 15%;"></div>
+                </div>
+                <span class="row-val" id="bdBaseImpact">+4.9m</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Dispatch Simulation CTA Button -->
+          <div class="dispatch-action-wrap">
+            <button id="dispatchBtn" class="btn-primary-glow">
+              <span class="btn-sparkle">✨</span>
+              <span class="btn-text">DISPATCH FOOD EXPRESS ON LIVE RUN</span>
+              <span class="btn-arrow">➔</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- CONTROLS CONTAINER -->
+        <div class="controls-panel glass-panel">
+          
+          <div class="controls-header">
+            <h3>Delivery Order Parameters</h3>
+            <span class="sub-hint">Adjust inputs to watch real-time environment & prediction updates</span>
+          </div>
+
+          <!-- Input 1: Delivery Distance -->
+          <div class="control-group">
+            <div class="control-header">
+              <label for="distanceSlider" class="control-label">
+                <span class="label-icon">📍</span> Trip Distance
+              </label>
+              <div class="val-badge" id="distanceBadge">5.0 km</div>
+            </div>
+            <div class="slider-wrapper">
+              <input type="range" id="distanceSlider" min="1.0" max="15.0" step="0.5" value="5.0" class="custom-slider">
+              <div class="slider-marks">
+                <span>1 km (Local)</span>
+                <span>5 km (City)</span>
+                <span>10 km (Metro)</span>
+                <span>15 km (Max)</span>
+              </div>
+            </div>
+            <!-- Quick Chips -->
+            <div class="quick-chips">
+              <button class="chip" data-target="distanceSlider" data-val="2.0">2 km</button>
+              <button class="chip active" data-target="distanceSlider" data-val="5.0">5 km</button>
+              <button class="chip" data-target="distanceSlider" data-val="8.5">8.5 km</button>
+              <button class="chip" data-target="distanceSlider" data-val="12.0">12 km</button>
+              <button class="chip" data-target="distanceSlider" data-val="15.0">15 km</button>
+            </div>
+          </div>
+
+          <!-- Input 2: Food Preparation Time -->
+          <div class="control-group">
+            <div class="control-header">
+              <label for="prepSlider" class="control-label">
+                <span class="label-icon">⏱️</span> Food Preparation Time
+              </label>
+              <div class="val-badge badge-orange" id="prepBadge">15 min</div>
+            </div>
+            <div class="slider-wrapper">
+              <input type="range" id="prepSlider" min="5" max="30" step="1" value="15" class="custom-slider slider-orange">
+              <div class="slider-marks">
+                <span>5 min (Express)</span>
+                <span>15 min (Meal)</span>
+                <span>25 min (Feast)</span>
+                <span>30 min (Max)</span>
+              </div>
+            </div>
+            <!-- Quick Chips -->
+            <div class="quick-chips">
+              <button class="chip" data-target="prepSlider" data-val="8">Quick Snack (8m)</button>
+              <button class="chip active" data-target="prepSlider" data-val="15">Main Course (15m)</button>
+              <button class="chip" data-target="prepSlider" data-val="25">Gourmet Prep (25m)</button>
+            </div>
+          </div>
+
+          <!-- Input 3: Traffic Conditions (Visual Selector Cards) -->
+          <div class="control-group">
+            <div class="control-header">
+              <label class="control-label">
+                <span class="label-icon">🚦</span> Traffic Level
+              </label>
+              <span class="val-sub" id="trafficDesc">Moderate Traffic Flow</span>
+            </div>
+            <div class="cards-grid cards-traffic">
+              <div class="option-card" data-group="traffic" data-val="1">
+                <div class="opt-icon">🟢</div>
+                <div class="opt-title">Clear Road</div>
+                <div class="opt-desc">Level 1 • High Speed</div>
+              </div>
+              <div class="option-card selected" data-group="traffic" data-val="2">
+                <div class="opt-icon">🟡</div>
+                <div class="opt-title">Moderate</div>
+                <div class="opt-desc">Level 2 • Normal Flow</div>
+              </div>
+              <div class="option-card" data-group="traffic" data-val="3">
+                <div class="opt-icon">🟠</div>
+                <div class="opt-title">Heavy Traffic</div>
+                <div class="opt-desc">Level 3 • Congestion</div>
+              </div>
+              <div class="option-card" data-group="traffic" data-val="4">
+                <div class="opt-icon">🔴</div>
+                <div class="opt-title">Gridlock Jam</div>
+                <div class="opt-desc">Level 4 • Rush Hour</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Input 4: Weather Conditions (Visual Selector Cards) -->
+          <div class="control-group">
+            <div class="control-header">
+              <label class="control-label">
+                <span class="label-icon">🌦️</span> Weather Condition
+              </label>
+              <span class="val-sub" id="weatherDesc">Clear Skies & Sun</span>
+            </div>
+            <div class="cards-grid cards-weather">
+              <div class="option-card selected" data-group="weather" data-val="0">
+                <div class="opt-icon">☀️</div>
+                <div class="opt-title">Sunny & Clear</div>
+                <div class="opt-desc">Level 0 • Dry Roads</div>
+              </div>
+              <div class="option-card" data-group="weather" data-val="1">
+                <div class="opt-icon">⛅</div>
+                <div class="opt-title">Overcast & Wind</div>
+                <div class="opt-desc">Level 1 • Cool Breeze</div>
+              </div>
+              <div class="option-card" data-group="weather" data-val="2">
+                <div class="opt-icon">🌧️</div>
+                <div class="opt-title">Heavy Rain</div>
+                <div class="opt-desc">Level 2 • Wet Roads</div>
+              </div>
+              <div class="option-card" data-group="weather" data-val="3">
+                <div class="opt-icon">⛈️</div>
+                <div class="opt-title">Thunderstorm</div>
+                <div class="opt-desc">Level 3 • Severe Storm</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Input 5: Rider Experience -->
+          <div class="control-group">
+            <div class="control-header">
+              <label for="riderSlider" class="control-label">
+                <span class="label-icon">🏆</span> Rider Experience
+              </label>
+              <div class="val-badge badge-green" id="riderBadge">3 Years • Active Rider</div>
+            </div>
+            <div class="slider-wrapper">
+              <input type="range" id="riderSlider" min="0" max="10" step="1" value="3" class="custom-slider slider-green">
+              <div class="slider-marks">
+                <span>0 yr (Rookie)</span>
+                <span>3 yr (Skilled)</span>
+                <span>6 yr (Pro)</span>
+                <span>10 yr (Master)</span>
+              </div>
+            </div>
+            <div class="rider-perk-card" id="riderPerkCard">
+              <span class="perk-icon">⚡</span>
+              <span class="perk-text" id="riderPerkText">Rookie discount: Saves up to 1.1 minutes via smart shortcuts</span>
+            </div>
+          </div>
+
+        </div>
+
+      </section>
+
+    </main>
+
+    <!-- Model Details Modal -->
+    <div class="modal-backdrop" id="modelModal">
+      <div class="modal-box glass-panel">
+        <div class="modal-header">
+          <h3>Rio.pkl Machine Learning Architecture</h3>
+          <button class="modal-close" id="modalCloseBtn">✕</button>
+        </div>
+        <div class="modal-body">
+          <p>This web interface loads and runs predictions on the trained scikit-learn model: <code>Rio.pkl</code>.</p>
+          
+          <div class="formula-box">
+            <code>Delivery Time = 4.9411 + (3.0071 × Distance) + (0.9972 × Prep) + (3.9803 × Traffic) + (1.9792 × Weather) - (0.3578 × Experience)</code>
+          </div>
+
+          <table class="model-table">
+            <thead>
+              <tr>
+                <th>Feature Name</th>
+                <th>Learned Weight (Coef)</th>
+                <th>Interpretation</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>distance_km</code></td>
+                <td><strong class="text-orange">+3.0071</strong></td>
+                <td>Each kilometer adds ~3 minutes of travel time</td>
+              </tr>
+              <tr>
+                <td><code>preparation_time_min</code></td>
+                <td><strong class="text-orange">+0.9972</strong></td>
+                <td>Kitchen time translates 1:1 directly into delivery wait</td>
+              </tr>
+              <tr>
+                <td><code>traffic_level</code></td>
+                <td><strong class="text-red">+3.9803</strong></td>
+                <td>Each traffic level hike adds ~4 minutes delay</td>
+              </tr>
+              <tr>
+                <td><code>weather_severity</code></td>
+                <td><strong class="text-blue">+1.9792</strong></td>
+                <td>Rain & storms add ~2 minutes per severity level</td>
+              </tr>
+              <tr>
+                <td><code>rider_experience_years</code></td>
+                <td><strong class="text-green">-0.3578</strong></td>
+                <td>Veterans shave off ~0.36 min/yr via better navigation</td>
+              </tr>
+              <tr>
+                <td><code>Base Intercept</code></td>
+                <td><strong>+4.9411</strong></td>
+                <td>Fixed base dispatch and handoff overhead</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dispatch Toast Celebration Banner -->
+    <div class="dispatch-toast" id="dispatchToast">
+      <div class="toast-content">
+        <span class="toast-icon">🛵💨</span>
+        <div class="toast-text">
+          <strong>Order Dispatched! Food Express is on the move!</strong>
+          <p>Navigating through current weather and traffic to reach customer on time.</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Scripts -->
+  <script src="animations.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
+
