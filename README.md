@@ -12,13 +12,13 @@
   <strong>An End-to-End Machine Learning System & Kinetic Simulation Deck for Accurate Food Delivery Duration Estimation.</strong>
 </p>
 
-[Quickstart](#-quickstart-guide-for-judges) • [Key Innovations](#-key-highlights-for-judges) • [Model Architecture](#-machine-learning-architecture) • [Simulation Features](#-interactive-simulation-features) • [Project Structure](#-project-structure)
+[Quickstart](#-quickstart-guide) • [Key Innovations](#-key-highlights) • [Model Architecture](#-machine-learning-architecture) • [Simulation Features](#-interactive-simulation-features) • [Project Structure](#-project-structure)
 
 </div>
 
 ---
 
-## 📌 Executive Summary (For Judges)
+## 📌 Executive Summary
 
 Accurate Estimated Time of Arrival (ETA) is the single most critical trust metric in on-demand food logistics. Under-promising leads to customer frustration, while over-promising leads to cancellations and cold food.
 
@@ -32,7 +32,7 @@ Traditional rule-based estimations fail because delivery duration is **multivari
 
 ---
 
-## 🏆 Key Highlights for Judges
+## 🏆 Key Highlights
 
 | Feature | Description | Business & Technical Value |
 | :--- | :--- | :--- |
@@ -40,7 +40,7 @@ Traditional rule-based estimations fail because delivery duration is **multivari
 | **High Precision ($R^2 = 0.984$)** | Validated using 80/20 train/test split with rigorous error metrics | Minimizes variance between promised and actual arrival |
 | **Real-Time Factor Attribution** | Live waterfall breakdown of base, transit, kitchen, traffic, and weather friction | Builds customer trust through complete transparency |
 | **Interactive Visual World** | Full kinetic simulation of rider, weather, traffic, and kitchen activity | Demonstrates dynamic environmental responsiveness |
-| **Zero-Friction Evaluation** | Built-in web server with pure Python + Web Audio API synthesizer | Judges can launch and evaluate in 1 terminal command |
+| **Zero-Friction Evaluation** | Built-in web server with pure Python + Web Audio API synthesizer | Launch and evaluate in a single terminal command with zero extra dependencies |
 
 ---
 
@@ -109,7 +109,7 @@ Features an onboard audio synthesizer built with the **Web Audio API** (zero ext
 
 ---
 
-## ⚡ Quickstart Guide (For Judges)
+## ⚡ Quickstart Guide
 
 Evaluate the full application locally in under 30 seconds:
 
@@ -140,7 +140,7 @@ Open **[http://localhost:8000](http://localhost:8000)** in your browser.
 
 ```
 Smart_Delivery_ETA_Predictor/
-├── README.md               # Comprehensive project documentation for judges
+├── README.md               # Comprehensive project documentation & architecture guide
 ├── app.py                  # Standalone Python web & REST API server
 ├── .gitignore              # Clean Git ignore profile (excludes venvs & binaries)
 │
@@ -213,3 +213,4 @@ The backend exposes lightweight REST endpoints for integration with external log
 <div align="center">
   <sub>Developed for the Smart Logistics Challenge • Built with precision & passion.</sub>
 </div>
+
